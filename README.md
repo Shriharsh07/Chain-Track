@@ -27,5 +27,5 @@ It allows users to submit transactions and mine blocks to store them securely in
 1. **Clone the repository:**
 
 ```bash
-git clone https://github.com/yourusername/chaintrack.git
+git clone https://github.com/Shriharsh07/Chain-Track.git
 cd chaintrack
