@@ -5,6 +5,7 @@ go 1.22.3
 require (
 	github.com/gorilla/mux v1.8.1
 	github.com/jackc/pgx v3.6.2+incompatible
+	github.com/joho/godotenv v1.5.1
 	gorm.io/driver/mysql v1.5.7
 	gorm.io/gorm v1.25.7
 )
