@@ -1,10 +1,11 @@
 package models
 
-import "time"
+import (
+	"gorm.io/gorm"
+)
 
 type Block struct {
-	ID           uint `gorm:"primaryKey"`
-	Timestamp    time.Time
+	gorm.Model
 	Transactions []Transaction `gorm:"-"`
 	PreviousHash string
 	Hash         string

@@ -3,13 +3,14 @@ package models
 import (
 	"time"
 
-	uuid "github.com/jackc/pgx/pgtype/ext/satori-uuid"
+	uuid "github.com/google/uuid"
 )
 
 type Transaction struct {
-	ID        uuid.UUID `gorm:"type:char(36);primaryKey"`
-	Sender    string
-	Receiver  string
-	Amount    float64
-	CreatedAt time.Time
+	ID        uuid.UUID `json:"id" gorm:"type:char(36) primaryKey"`
+	Sender    string    `json:"sender"`
+	Receiver  string    `json:"receiver"`
+	Amount    float64   `json:"amount"`
+	IsMined   bool      `gorm:"default:false"`
+	CreatedAt time.Time `json:"created_at"`
 }

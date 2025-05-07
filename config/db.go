@@ -37,7 +37,8 @@ func ConnectDB() {
 		log.Fatal("Failed to connect to database: ", err)
 	}
 
-	_ = DB.AutoMigrate(&models.Transaction{}, &models.Block{})
+	// Migrate the schema
+	DB.AutoMigrate(&models.Block{}, &models.Transaction{})
 
 	fmt.Println("Database connected successfully!")
 }
