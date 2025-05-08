@@ -7,10 +7,10 @@ import (
 )
 
 type Transaction struct {
-	ID        uuid.UUID `json:"id" gorm:"type:char(36) primaryKey"`
-	Sender    string    `json:"sender"`
-	Receiver  string    `json:"receiver"`
-	Amount    float64   `json:"amount"`
+	ID        uuid.UUID `json:"id" gorm:"type:char(36);primaryKey"`
+	Sender    string    `json:"sender" validate:"required,email"`
+	Receiver  string    `json:"receiver" validate:"required,email"`
+	Amount    float64   `json:"amount" validate:"required,min=0.01"`
 	IsMined   bool      `gorm:"default:false"`
 	CreatedAt time.Time `json:"created_at"`
 }

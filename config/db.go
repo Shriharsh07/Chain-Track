@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/Shriharsh07/chaintrack/models"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -36,9 +35,6 @@ func ConnectDB() {
 	if err != nil {
 		log.Fatal("Failed to connect to database: ", err)
 	}
-
-	// Migrate the schema
-	DB.AutoMigrate(&models.Block{}, &models.Transaction{})
 
 	fmt.Println("Database connected successfully!")
 }
