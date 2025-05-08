@@ -1,0 +1,48 @@
+name: CI Pipeline
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      mysql:  # Temporary DB for testing
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: 1234
+          MYSQL_DATABASE: chaintrack_test
+        ports: [3306:3306]
+        options: >-
+          --health-cmd="mysqladmin ping -p1234"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: "1.22.3"
+
+    - name: Run unit tests
+      run: go test -v ./...
+
+    - name: Build Docker image
+      run: docker build -t chain-track-api .
+
+    - name: Run integration tests
+      env:
+        DB_HOST: localhost
+        DB_PORT: 3306
+        DB_USER: root
+        DB_PASS: 1234
+        DB_NAME: chaintrack_test
+      run: |
+        docker run --rm \
+          --network host \
+          -e DB_HOST -e DB_PORT -e DB_USER -e DB_PASS -e DB_NAME \
+          chain-track-api \
+          go test -tags=integration -v ./...

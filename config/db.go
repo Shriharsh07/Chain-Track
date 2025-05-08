@@ -12,7 +12,7 @@ import (
 
 var DB *gorm.DB
 
-func ConnectDB() {
+func ConnectDB() error {
 	var err error
 	maxRetries := 10
 	retryInterval := 5 * time.Second
@@ -62,4 +62,5 @@ func ConnectDB() {
 	}
 
 	fmt.Println("Database connected successfully!")
+	return nil
 }
