@@ -11,7 +11,7 @@ RUN go mod download
 # Copy the full source code
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o blockchain-api ./cmd/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o blockchain-api ./main.go
 
 # Step 2: Use a minimal base image to run the app
 FROM gcr.io/distroless/base-debian10
