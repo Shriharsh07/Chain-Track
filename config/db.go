@@ -17,15 +17,15 @@ func ConnectDB() error {
 	maxRetries := 10
 	retryInterval := 5 * time.Second
 
-	db_user := os.Getenv("MYSQLUSER")
-	db_pass := os.Getenv("MYSQLPASSWORD")
-	db_host := os.Getenv("MYSQLHOST")
-	db_port := os.Getenv("MYSQLPORT")
-	db_name := os.Getenv("MYSQL_DATABASE")
+	db_user := os.Getenv("DB_USER")
+	db_pass := os.Getenv("DB_PASS")
+	db_host := os.Getenv("DB_HOST")
+	db_port := os.Getenv("DB_PORT")
+	db_name := os.Getenv("DB_NAME")
 
 	// Build connection string
 	dsn := fmt.Sprintf(
-		"%s:%s@tcp(%s:%s)/%s",
+		"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		db_user,
 		db_pass,
 		db_host,
