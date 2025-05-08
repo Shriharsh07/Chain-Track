@@ -50,10 +50,20 @@ cd Chain-Track
 
 # Install dependencies
 go mod tidy
+```
 
-# Configure MySQL connection in `database/db.go`
+### 🔐 Configure Environment Variables
+Create a .env file in the project root with the following content:
+```
+DB_USER=your_db_username
+DB_PASS=your_db_password
+DB_NAME=database_name //Example : chaintrack
+DB_HOST=localhost
+DB_PORT=3306
+```
 
-# Run the project
+### Run the project
+```
 go run cmd/main.go
 ```
 
