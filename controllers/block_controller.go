@@ -1,16 +1,14 @@
 package controllers
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/Shriharsh07/chaintrack/config"
 	"github.com/Shriharsh07/chaintrack/models"
+	"github.com/Shriharsh07/chaintrack/service"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"gorm.io/gorm"
@@ -58,13 +56,29 @@ func MineBlock(w http.ResponseWriter, r *http.Request) {
 		data += fmt.Sprintf("%s->%s:%.2f|", tx.Sender, tx.Receiver, tx.Amount)
 	}
 
-	hash := sha256.Sum256([]byte(data + lastHash + time.Now().String()))
-	hashStr := hex.EncodeToString(hash[:])
+	// Proof-of-Work: Finding the valid nonce
+	difficulty := 4 // Number of leading zeros required in the hash
+	var nonce int
+	var hash string
+	var validHash bool
+
+	// Start with an empty hash and loop to find the correct one
+	for {
+		hash = service.CalculateHash(data + lastHash + fmt.Sprintf("%d", nonce))
+		validHash = service.IsValidPoW(hash, difficulty)
+
+		if validHash {
+			break
+		}
+
+		nonce++
+	}
 
 	block := models.Block{
 		Transactions: transactions,
 		PreviousHash: lastHash,
-		Hash:         hashStr,
+		Hash:         hash,
+		Nonce:        nonce,
 	}
 
 	if err := config.DB.Create(&block).Error; err != nil {

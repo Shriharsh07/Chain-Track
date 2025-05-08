@@ -9,4 +9,5 @@ type Block struct {
 	Transactions []Transaction `gorm:"-"`
 	PreviousHash string
 	Hash         string
+	Nonce        int
 }
