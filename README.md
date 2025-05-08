@@ -16,7 +16,7 @@ This system allows users to submit transactions which are later grouped into blo
 - **GORM** — ORM for MySQL
 - **MySQL** — database for storing transactions and blocks
 - **Gorilla Mux** — HTTP routing
-- **Docker** *(optional)* — containerization for deployment
+- **Docker**  — containerization for deployment
 
 ---
 
@@ -52,19 +52,69 @@ cd Chain-Track
 go mod tidy
 ```
 
-### 🔐 Configure Environment Variables
-Create a .env file in the project root with the following content:
+## 🐳 Docker Setup
+
+This project comes with a `docker-compose.yml` file to help you spin up the entire stack — API and MySQL — quickly and cleanly.
+
+### 📁 Files Involved
+
+- **`Dockerfile`** – Builds the Go application using a multi-stage setup.
+- **`docker-compose.yml`** – Defines and links the `api` and `db` services.
+- **`.env` (optional)** – Can be used to manage environment variables securely.
+
+---
+
+### 🧱 Services Defined
+
+#### 1. `api` – Go Application
+
+- Built from the local `Dockerfile`.
+- Runs the blockchain ledger service on port `8080`.
+- Connects to the MySQL container using the internal Docker network.
+- Waits for the database to become healthy before starting.
+
+#### 2. `db` – MySQL 8 Database
+
+- Exposes MySQL on port `3307` (host) mapped to `3306` (container).
+- Uses root credentials and initializes the `chaintrack` database.
+- Persists data using a named Docker volume `db_data`.
+- Has a health check to ensure readiness before the API connects.
+
+---
+
+### ⚙️ Environment Variables
+All required environment variables for both the API and the database are defined directly in the docker-compose.yml file.
+Here's an example of how they're declared:
+
 ```
-DB_USER=your_db_username
-DB_PASS=your_db_password
-DB_NAME=database_name //Example : chaintrack
-DB_HOST=localhost
-DB_PORT=3306
+services:
+  api:
+    environment:
+      - DB_USER=root
+      - DB_PASS=password
+      - DB_NAME=chaintrack
+      - DB_HOST=db
+      - DB_PORT=3306
+
+  db:
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=chaintrack
 ```
 
-### Run the project
+### ➕ Adding More Variables
+To add more environment variables, simply edit the api or db section in docker-compose.yml:
 ```
-go run cmd/main.go
+environment:
+  - NEW_ENV_VAR=value
 ```
 
+### ▶️ How to Run with Docker
 
+```bash
+# Build and start containers
+docker-compose up --build
+```
+
+#### The API will be accessible at: http://localhost:8080
+---
