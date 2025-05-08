@@ -9,11 +9,11 @@ services:
       db:
         condition: service_healthy
     environment:
-      DB_HOST: db
-      DB_PORT: 3306
-      DB_USER: root
-      DB_PASS: 1234
-      DB_NAME: chaintrack
+      MYSQLHOST: db
+      MYSQLPORT: 3306
+      MYSQLUSER: root
+      MYSQLPASSWORD: 1234
+      MYSQL_DATABASE: chaintrack
     networks:
       - app-network
 
