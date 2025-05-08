@@ -40,3 +40,4 @@ jobs:
         DB_USER: root
         DB_PASS: 1234
         DB_NAME: chaintrack_test
+      run: go test -v ./integration-tests
