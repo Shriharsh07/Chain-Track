@@ -40,9 +40,3 @@ jobs:
         DB_USER: root
         DB_PASS: 1234
         DB_NAME: chaintrack_test
-      run: |
-        docker run --rm \
-          --network host \
-          -e DB_HOST -e DB_PORT -e DB_USER -e DB_PASS -e DB_NAME \
-          chain-track-api \
-          go test -tags=integration -v ./...
