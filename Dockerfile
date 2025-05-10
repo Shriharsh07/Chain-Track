@@ -1,5 +1,5 @@
 # Step 1: Use the official Go image to build the binary
-FROM golang:1.22.3 AS builder
+FROM golang:1.23.9 AS builder
 
 # Set the working directory inside the container
 WORKDIR /app
