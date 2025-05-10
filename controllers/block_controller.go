@@ -14,14 +14,17 @@ import (
 	"gorm.io/gorm"
 )
 
-func markTransactionAsMined(transactionID uuid.UUID) {
+func markTransactionAsMined(transactionID uuid.UUID, blockID uint) {
 	var transaction models.Transaction
 	if err := config.DB.First(&transaction, transactionID).Error; err != nil {
 		log.Println("Transaction not found")
 		return
 	}
-	transaction.IsMined = true
-	config.DB.Save(&transaction)
+	data := config.DB.Model(&models.Transaction{}).Where("id = ?", transactionID).Updates(map[string]interface{}{"is_mined": true, "block_id": blockID})
+	if data.Error != nil {
+		log.Println("Failed to mark transaction as mined", data.Error.Error())
+		return
+	}
 }
 
 func MineBlock(w http.ResponseWriter, r *http.Request) {
@@ -75,7 +78,6 @@ func MineBlock(w http.ResponseWriter, r *http.Request) {
 	}
 
 	block := models.Block{
-		Transactions: transactions,
 		PreviousHash: lastHash,
 		Hash:         hash,
 		Nonce:        nonce,
@@ -87,7 +89,7 @@ func MineBlock(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, tx := range transactions {
-		markTransactionAsMined(tx.ID)
+		markTransactionAsMined(tx.ID, block.ID)
 	}
 
 	w.WriteHeader(http.StatusCreated)
@@ -114,4 +116,31 @@ func GetBlockByID(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(block)
+}
+
+func TamperBlockData(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	blockID := vars["id"]
+
+	var block models.Block
+	if err := config.DB.First(&block, blockID).Error; err != nil {
+		http.Error(w, "Block not found", http.StatusNotFound)
+		return
+	}
+
+	var tx models.Transaction
+	if err := config.DB.Where("block_id = ?", block.ID).First(&tx).Error; err != nil {
+		http.Error(w, "No transactions found for block", http.StatusNotFound)
+		return
+	}
+
+	// Tamper the transaction
+	tx.Amount += 1000 // e.g., inflate amount
+	if err := config.DB.Save(&tx).Error; err != nil {
+		http.Error(w, "Failed to tamper transaction", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode("Block data tampered successfully")
 }
