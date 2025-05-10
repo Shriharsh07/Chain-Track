@@ -9,8 +9,10 @@ import (
 
 	"github.com/Shriharsh07/chaintrack/config"
 	"github.com/Shriharsh07/chaintrack/models"
+	"github.com/Shriharsh07/chaintrack/service"
 	"github.com/go-playground/validator"
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 )
 
 var validate *validator.Validate
@@ -66,7 +68,7 @@ func CreateTransaction(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(tx)
 }
 
-func GetTransactions(w http.ResponseWriter, r *http.Request) {
+func GetAllTransactions(w http.ResponseWriter, r *http.Request) {
 	transactions := []models.Transaction{}
 	if err := config.DB.Find(&transactions).Error; err != nil {
 		http.Error(w, fmt.Sprintf("Failed to retrieve transactions: %v", err), http.StatusInternalServerError)
@@ -75,4 +77,62 @@ func GetTransactions(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(transactions)
+}
+
+func GetTransactionsByBlockID(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["blockId"]
+
+	var transactions []models.Transaction
+	if err := config.DB.Where("block_id = ?", id).Find(&transactions).Error; err != nil {
+		http.Error(w, fmt.Sprintf("Failed to retrieve transactions: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(transactions)
+}
+
+func ValidateChain(w http.ResponseWriter, r *http.Request) {
+	var blocks []models.Block
+	if err := config.DB.Order("id asc").Find(&blocks).Error; err != nil {
+		http.Error(w, "Failed to fetch blocks", http.StatusInternalServerError)
+		return
+	}
+
+	difficulty := 4
+	var invalidBlocks []map[string]interface{}
+
+	for _, block := range blocks {
+		var txs []models.Transaction
+		config.DB.Where("block_id = ?", block.ID).Find(&txs)
+
+		data := ""
+		for _, tx := range txs {
+			data += fmt.Sprintf("%s->%s:%.2f|", tx.Sender, tx.Receiver, tx.Amount)
+		}
+
+		expectedHash := service.CalculateHash(data + block.PreviousHash + fmt.Sprintf("%d", block.Nonce))
+
+		if block.Hash != expectedHash || !service.IsValidPoW(block.Hash, difficulty) {
+			invalidBlocks = append(invalidBlocks, map[string]interface{}{
+				"block_id":      block.ID,
+				"expected_hash": expectedHash,
+				"stored_hash":   block.Hash,
+			})
+		}
+	}
+
+	if len(invalidBlocks) > 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"message":        "Blockchain is invalid",
+			"invalid_blocks": invalidBlocks,
+		})
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "Blockchain is valid",
+	})
 }
