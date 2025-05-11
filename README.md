@@ -140,4 +140,5 @@ http://localhost:8080/swagger/index.html
 
 - API Documentation Generation: The annotations are used to generate interactive API documentation.
 
-- Swagger JSON: The Swagger specification is available at: http://localhost:8080/swagger/doc.json
+- Swagger JSON: The Swagger specification is available at: http://localhost:8080/swagger/doc.json.
+You can use this JSON to import into other tools like Postman or Redoc if needed.
