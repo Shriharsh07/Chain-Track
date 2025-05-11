@@ -1,0 +1,243 @@
+definitions:
+  models.BlockResponse:
+    properties:
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      hash:
+        type: string
+      id:
+        type: integer
+      nonce:
+        type: integer
+      previous_hash:
+        type: string
+      transactions:
+        items:
+          $ref: '#/definitions/models.Transaction'
+        type: array
+      updated_at:
+        type: string
+    type: object
+  models.Transaction:
+    properties:
+      amount:
+        minimum: 0.01
+        type: number
+      block_id:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: string
+      isMined:
+        type: boolean
+      receiver:
+        type: string
+      sender:
+        type: string
+    required:
+    - amount
+    - receiver
+    - sender
+    type: object
+info:
+  contact: {}
+paths:
+  /block/{id}:
+    get:
+      description: Retrieve a single block by its ID
+      parameters:
+      - description: Block ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.BlockResponse'
+        "404":
+          description: Block not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Get Block by ID
+      tags:
+      - Blocks
+    post:
+      description: Tamper the data of a transaction within the specified block
+      parameters:
+      - description: Block ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Block data tampered successfully
+          schema:
+            type: string
+        "404":
+          description: Block or transaction not found
+          schema:
+            type: string
+        "500":
+          description: Failed to tamper transaction
+          schema:
+            type: string
+      summary: Tamper Block Data
+      tags:
+      - Blocks
+  /blocks:
+    get:
+      description: Retrieve all blocks from the database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              items:
+                $ref: '#/definitions/models.BlockResponse'
+              type: array
+            type: array
+        "500":
+          description: Failed to retrieve blocks
+          schema:
+            type: string
+      summary: Get All Blocks
+      tags:
+      - Blocks
+  /mine:
+    post:
+      description: Takes all unmined transactions and creates a new block
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.BlockResponse'
+        "400":
+          description: No transactions to mine
+          schema:
+            type: string
+        "500":
+          description: Failed to mine block
+          schema:
+            type: string
+      summary: Mines a new block
+      tags:
+      - Block Mining
+  /transaction:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new transaction with sender, receiver, and amount
+      parameters:
+      - description: Transaction details
+        in: body
+        name: transaction
+        required: true
+        schema:
+          $ref: '#/definitions/models.Transaction'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Transaction'
+        "400":
+          description: Validation failed or invalid input
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to create transaction
+          schema:
+            type: string
+      summary: Create a new transaction
+      tags:
+      - Transactions
+  /transactions:
+    get:
+      description: Retrieve all transactions from the database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Transaction'
+            type: array
+        "500":
+          description: Failed to retrieve transactions
+          schema:
+            type: string
+      summary: Get All Transactions
+      tags:
+      - Transactions
+  /transactions/{blockId}:
+    get:
+      description: Retrieve all transactions for a specific block by its ID
+      parameters:
+      - description: Block ID
+        in: path
+        name: blockId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Transaction'
+            type: array
+        "500":
+          description: Failed to retrieve transactions
+          schema:
+            type: string
+      summary: Get Transactions by Block ID
+      tags:
+      - Transactions
+  /validate:
+    get:
+      description: Validate the blockchain by checking the hashes and proof of work
+        of each block
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Blockchain is valid
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Blockchain is invalid
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to fetch blocks
+          schema:
+            type: string
+      summary: Validate Blockchain Integrity
+      tags:
+      - Blockchain
+swagger: "2.0"

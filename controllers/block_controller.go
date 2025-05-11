@@ -27,6 +27,14 @@ func markTransactionAsMined(transactionID uuid.UUID, blockID uint) {
 	}
 }
 
+// @Summary      Mines a new block
+// @Description  Takes all unmined transactions and creates a new block
+// @Tags         Block Mining
+// @Produce      json
+// @Success      201  {object}  models.BlockResponse
+// @Failure      400  {string}  string  "No transactions to mine"
+// @Failure      500  {string}  string  "Failed to mine block"
+// @Router       /mine [post]
 func MineBlock(w http.ResponseWriter, r *http.Request) {
 	var transactions []models.Transaction
 	result := config.DB.Model(&models.Transaction{}).Where("is_mined = ?", false).Find(&transactions)
@@ -96,6 +104,13 @@ func MineBlock(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(block)
 }
 
+// @Summary      Get All Blocks
+// @Description  Retrieve all blocks from the database
+// @Tags         Blocks
+// @Produce      json
+// @Success      200  {array} []models.BlockResponse
+// @Failure      500  {string}  string  "Failed to retrieve blocks"
+// @Router       /blocks [get]
 func GetBlocks(w http.ResponseWriter, r *http.Request) {
 	var blocks []models.Block
 	if err := config.DB.Order("id desc").Find(&blocks).Error; err != nil {
@@ -105,6 +120,15 @@ func GetBlocks(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(blocks)
 }
 
+// @Summary      Get Block by ID
+// @Description  Retrieve a single block by its ID
+// @Tags         Blocks
+// @Produce      json
+// @Param        id   path      int  true  "Block ID"
+// @Success      200  {object}  models.BlockResponse
+// @Failure      404  {string}  string  "Block not found"
+// @Failure      500  {string}  string  "Internal server error"
+// @Router       /block/{id} [get]
 func GetBlockByID(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 
@@ -118,6 +142,15 @@ func GetBlockByID(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(block)
 }
 
+// @Summary      Tamper Block Data
+// @Description  Tamper the data of a transaction within the specified block
+// @Tags         Blocks
+// @Param        id   path      int     true  "Block ID"
+// @Produce      json
+// @Success      200  {string}  string  "Block data tampered successfully"
+// @Failure      404  {string}  string  "Block or transaction not found"
+// @Failure      500  {string}  string  "Failed to tamper transaction"
+// @Router       /block/{id} [post]
 func TamperBlockData(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	blockID := vars["id"]

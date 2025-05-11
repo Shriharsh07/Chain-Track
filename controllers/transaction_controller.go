@@ -21,6 +21,16 @@ func init() {
 	validate = validator.New()
 }
 
+// @Summary      Create a new transaction
+// @Description  Creates a new transaction with sender, receiver, and amount
+// @Tags         Transactions
+// @Accept       json
+// @Produce      json
+// @Param        transaction  body      models.Transaction  true  "Transaction details"
+// @Success      201          {object}  models.Transaction
+// @Failure      400          {object}  map[string]interface{}  "Validation failed or invalid input"
+// @Failure      500          {string}  string  "Failed to create transaction"
+// @Router       /transaction [post]
 func CreateTransaction(w http.ResponseWriter, r *http.Request) {
 	var tx models.Transaction
 	err := json.NewDecoder(r.Body).Decode(&tx)
@@ -68,6 +78,13 @@ func CreateTransaction(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(tx)
 }
 
+// @Summary      Get All Transactions
+// @Description  Retrieve all transactions from the database
+// @Tags         Transactions
+// @Produce      json
+// @Success      200  {array}  models.Transaction
+// @Failure      500  {string}  string  "Failed to retrieve transactions"
+// @Router       /transactions [get]
 func GetAllTransactions(w http.ResponseWriter, r *http.Request) {
 	transactions := []models.Transaction{}
 	if err := config.DB.Find(&transactions).Error; err != nil {
@@ -79,6 +96,14 @@ func GetAllTransactions(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(transactions)
 }
 
+// @Summary      Get Transactions by Block ID
+// @Description  Retrieve all transactions for a specific block by its ID
+// @Tags         Transactions
+// @Produce      json
+// @Param        blockId  path      int  true  "Block ID"
+// @Success      200      {array}   models.Transaction
+// @Failure      500      {string}  string  "Failed to retrieve transactions"
+// @Router       /transactions/{blockId} [get]
 func GetTransactionsByBlockID(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["blockId"]
 
@@ -92,6 +117,14 @@ func GetTransactionsByBlockID(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(transactions)
 }
 
+// @Summary      Validate Blockchain Integrity
+// @Description  Validate the blockchain by checking the hashes and proof of work of each block
+// @Tags         Blockchain
+// @Produce      json
+// @Success      200  {object}  map[string]string  "Blockchain is valid"
+// @Failure      400  {object}  map[string]interface{}  "Blockchain is invalid"
+// @Failure      500  {string}  string  "Failed to fetch blocks"
+// @Router       /validate [get]
 func ValidateChain(w http.ResponseWriter, r *http.Request) {
 	var blocks []models.Block
 	if err := config.DB.Order("id asc").Find(&blocks).Error; err != nil {

@@ -118,3 +118,26 @@ docker-compose up --build
 
 #### The API will be accessible at: http://localhost:8080
 ---
+
+## 🧑‍💻 Swagger Documentation
+
+This project includes Swagger UI for easy access to the API documentation.
+
+### 🚀 Accessing Swagger UI
+Once the project is up and running, you can access the Swagger documentation at the following URL:
+```
+http://localhost:8080/swagger/index.html
+```
+#### This UI allows you to:
+ 
+- View all available API endpoints
+- See the structure of requests and responses
+- Test the API directly from the UI
+
+### Swagger UI is configured using the Go-swagger library. Here’s a breakdown of how it works:
+
+- Annotations: All API endpoints have been documented with Swaggo annotations.
+
+- API Documentation Generation: The annotations are used to generate interactive API documentation.
+
+- Swagger JSON: The Swagger specification is available at:
